@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+segmentation_deep/__pycache__/
+segmentation_deep/convert_bg.py
+segmentation_deep/preprocessing.py
+segmentation_deep/preprocessing.py
+segmentation_deep/preprocessing_384.py
+segmentation_deep/rename_files.py
+segmentation_deep/*.pth
+results/
+APDrawingDB/

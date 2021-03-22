@@ -25,8 +25,8 @@ from dataloader import (
     mean,
     std,
     get_transform,
-    PlantDataset,
-    PlantDataloader,
+    PortraitDataset,
+    PortraitDataloader,
 )
 from evaluation import dice_score, Scores, epoch_log
 
@@ -39,17 +39,18 @@ torch.cuda.manual_seed(seed)
 torch.manual_seed(seed)
 torch.backends.cudnn.deterministic = True
 
-base_path = Path(__file__).parent.parent
-data_path = Path(base_path / "data/").resolve()
+#base_path = Path(__file__).parent.parent
+#data_path = Path(base_path / "data/").resolve()
+data_path = Path("../APDrawingDB/data/").resolve()
 
 
 class Trainer(object):
     def __init__(self, model):
         self.num_workers = 4
-        self.batch_size = {"train": 1, "val": 1}
-        self.accumulation_steps = 4 // self.batch_size["train"]
-        self.lr = 5e-4
-        self.num_epochs = 250
+        self.batch_size = {"train": 8, "val": 1}
+        self.accumulation_steps = 24 // self.batch_size["train"]
+        self.lr = 1e-3
+        self.num_epochs = 50
         self.phases = ["train", "val"]
         self.best_loss = float("inf")
         self.device = torch.device("cuda:0")
@@ -58,14 +59,13 @@ class Trainer(object):
         cudnn.benchmark = True
         self.criterion = torch.nn.BCEWithLogitsLoss()
         self.optimizer = optim.Adam(self.net.parameters(), lr=self.lr)
-        self.scheduler = ReduceLROnPlateau(
-            self.optimizer, mode="min", patience=3, verbose=True
-        )
+        #self.scheduler = ReduceLROnPlateau(self.optimizer, mode="min", patience=3, verbose=True)
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=50, eta_min=1e-6, last_epoch=-1)
         self.dataloaders = {
-            phase: PlantDataloader(
-                df,
-                img_fol,
-                mask_fol,
+            phase: PortraitDataloader(
+                df[phase],
+                img_fol[phase],
+                mask_fol[phase],
                 mean,
                 std,
                 phase=phase,
@@ -79,8 +79,11 @@ class Trainer(object):
         self.dice_score = {phase: [] for phase in self.phases}
 
     def forward(self, inp_images, tar_mask):
+        #print(inp_images.shape)
+        #print(inp_images[0].shape)
         inp_images = inp_images.to(self.device)
         tar_mask = tar_mask.to(self.device)
+
         pred_mask = self.net(inp_images)
         loss = self.criterion(pred_mask, tar_mask)
         return loss, pred_mask
@@ -125,21 +128,31 @@ class Trainer(object):
             }
             with torch.no_grad():
                 val_loss = self.iterate(epoch, "val")
-                self.scheduler.step(val_loss)
+                self.scheduler.step()#val_loss)
             if val_loss < self.best_loss:
                 print("******** optimal found, saving state ********")
                 state["best_loss"] = self.best_loss = val_loss
-                torch.save(state, "./model_office.pth")
+                torch.save(state, "./model_office_384x384_effnet_2.pth")
             print()
 
 
 if __name__ == "__main__":
-    df = pd.read_csv(data_path / "Metadata.csv")
+    df_train = pd.DataFrame()
+    df_train['image_name'] = list(os.listdir('../APDrawingDB/data/train_imgs/'))
+
+    df_test = pd.DataFrame()
+    df_test['image_name'] = list(os.listdir('../APDrawingDB/data/test_imgs/'))
+    df = {'train': df_train, 'val': df_test}
+    #df = pd.read_csv(data_path / "Metadata.csv")
 
     # location of original and mask image
-    img_fol = data_path / "train-256"
-    mask_fol = data_path / "train_masks-256"
+    img_fol = {'train': data_path / "train_imgs", 'val': data_path / "test_imgs"}
+    mask_fol = {'train': data_path / "train_masks", 'val': data_path / "test_masks"}
+    #mask_fol = data_path / "train_masks"
 
-    model = smp.Unet("resnet34", encoder_weights="imagenet", classes=1, activation=None)
+    #model = smp.Unet("resnext50_32x4d", encoder_weights="imagenet", classes=1, activation='sigmoid')
+    model = smp.Unet("timm-efficientnet-b4", encoder_weights="noisy-student", classes=1, activation='sigmoid')
+
+    #print(model)
     model_trainer = Trainer(model)
     model_trainer.start()

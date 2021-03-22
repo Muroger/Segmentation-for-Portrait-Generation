@@ -4,9 +4,12 @@ from matplotlib import pyplot as plt
 import PIL
 import concurrent.futures
 
-base_path = Path(__file__).parent.parent
-data_path = Path(base_path / "data/").resolve()
-
+#base_path = Path(__file__).parent.parent
+#data_path = Path(base_path / "data/").resolve()
+data_path = Path("../data/").resolve()
+#print('base_path: ', base_path)
+#print('data_path', data_path)
+#print()
 
 def resize_mask(fn):
     image_file = PIL.Image.open(fn).resize((256, 256))
