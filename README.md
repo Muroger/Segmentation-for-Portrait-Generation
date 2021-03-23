@@ -3,11 +3,11 @@
 
 - UNET:
 
-![Results unet](figures/u2net1_pic.png)
-![Results unet](figures/u2net1_mask.png)
+![Results unet](figures/effnet1_pic.png)
+![Results unet](figures/effnet1_mask.png)
 
-![Results unet](figures/u2net2_pic.png)
-![Results unet](figures/u2net2_mask.png)
+![Results unet](figures/effnet2_pic.png)
+![Results unet](figures/effnet2_mask.png)
 
 - U2NET:
 
