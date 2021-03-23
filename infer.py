@@ -9,7 +9,7 @@ import os
 import cv2
 
 #base_path = Path(__file__).parent.parent
-data_path = Path("../APDrawingDB/data/").resolve()
+data_path = Path("./APDrawingDB/data/").resolve()
 
 #df = pd.read_csv(data_path / "my_metadata.csv")
 
@@ -76,10 +76,10 @@ with torch.no_grad():
         pred = 1. - np.float32(batch_preds)
         #print(pred.shape)
         #print(np.float32(pred))
-        #print('../results/'+name[0])
+        #print('./results/'+name[0])
         #plt.imshow(pred, cmap='gray')
         #plt.show()
-        cv2.imwrite('../results/'+name[0], pred*255)
+        cv2.imwrite('./results/'+name[0], pred*255)
         #break
         #ax2.imshow(np.squeeze(mask_target), cmap="gray")
         #plt.show()

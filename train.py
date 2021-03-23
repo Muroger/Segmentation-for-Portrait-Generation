@@ -41,7 +41,7 @@ torch.backends.cudnn.deterministic = True
 
 #base_path = Path(__file__).parent.parent
 #data_path = Path(base_path / "data/").resolve()
-data_path = Path("../APDrawingDB/data/").resolve()
+data_path = Path("./APDrawingDB/data/").resolve()
 
 
 class Trainer(object):
@@ -138,10 +138,10 @@ class Trainer(object):
 
 if __name__ == "__main__":
     df_train = pd.DataFrame()
-    df_train['image_name'] = list(os.listdir('../APDrawingDB/data/train_imgs/'))
+    df_train['image_name'] = list(os.listdir('./APDrawingDB/data/train_imgs/'))
 
     df_test = pd.DataFrame()
-    df_test['image_name'] = list(os.listdir('../APDrawingDB/data/test_imgs/'))
+    df_test['image_name'] = list(os.listdir('./APDrawingDB/data/test_imgs/'))
     df = {'train': df_train, 'val': df_test}
     #df = pd.read_csv(data_path / "Metadata.csv")
 
